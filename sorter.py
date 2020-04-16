@@ -39,23 +39,23 @@ name_script = os.path.basename(__file__)
 #Set percentages and making sure if you want to continue
 print("You are currently in {}".format(dir_path))
 
-percentage = input("\nPlease enter the similarity percentage. (Default is 60%)")
+percentageDec = input("\nPlease enter the similarity percentage. (Default is 60%)")
 try:
-    percentage = int(percentage)
+    percentageDec = int(percentageDec)
 except:
-        print("Input wrong value, defaulting to 60%")
-        percentage = 60
+        print("Input invalid value, defaulting to 60%")
+        percentageDec = 60
 
-if (percentage < 0):
-    print("Percentage is lower than 0% OR is null, defaulting to 60%.")
+if (percentageDec < 0):
+    print("Percentage is lower than 0%, defaulting to 60%.")
     percentage = 0.6
 else:
-    if percentage > 100:
+    if percentageDec > 100:
         print("Percentage is higher than 100%, defaulting to 60%.")
         percentage = 0.6
     else:
-        print("\nPercentage set as {} %.".format(percentage))
-        percentage = percentage / 100
+        print("\nPercentage set as {} %.".format(percentageDec))
+        percentage = percentageDec / 100
 
 while True:
     key = input("\nAre you sure you want to continue? Enter y to continue, n to quit.")
@@ -86,7 +86,7 @@ def similar(a, b):
 print("\nMoving files and creating folders...")
 
 while (amountofResults >= 0):
-    #Set up soem variables for current file that's being worked on
+    #Set up some variables for current file that's being worked on
     print("\nWorking with file {}...".format(discoveredResults[amountofResults]))
     filename, file_extension = os.path.splitext(discoveredResults[amountofResults])
 
@@ -102,8 +102,8 @@ while (amountofResults >= 0):
             folderpath, foldername = os.path.split(folderList[folderListCount])
             similarity = similar(foldername, filename)
             #Check for similarity in filename and foldername, put them together
-            if (similarity >= 0.6):
-                print("Similarity >= 60%, moving file {} to folder {}. ".format(filename, foldername))
+            if (similarity >= percentage):
+                print("Similarity >= {}%, moving file {} to folder {}. ".format(percentageDec, filename, foldername))
                 folderLocationExisting = dir_path + "/" + foldername
                 shutil.move(discoveredResults[amountofResults], folderLocationExisting)
                 amountofResults -= 1
@@ -129,11 +129,11 @@ while (amountofResults >= 0):
         #fail message feat. James May
         print("\n", ascii_banner_fail)
         print("Something went wrong with moving the files and creating folders.")
-        print("Press the enter key to quit")
+        print("Press any key to quit")
         getch()
         exit()
 
 print("\n", ascii_banner_success)
 print("Finished with sorting. Scroll up for log.")
-print("Press the enter key to quit")
+print("Press any key to quit")
 getch()
