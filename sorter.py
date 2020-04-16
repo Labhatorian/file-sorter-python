@@ -4,8 +4,24 @@
 import os, os.path
 import shutil
 import pyfiglet
-import keyboard
 from difflib import SequenceMatcher
+
+#For getch both Win32 and Unix.
+try:
+    # Win32
+    from msvcrt import getch
+except ImportError:
+    # UNIX
+    def getch():
+        import sys, tty, termios
+        fd = sys.stdin.fileno()
+        old = termios.tcgetattr(fd)
+        try:
+            tty.setraw(fd)
+            return sys.stdin.read(1)
+        finally:
+            termios.tcsetattr(fd, termios.TCSADRAIN, old)
+
 
 #Ascii banners for being cool
 ascii_banner = pyfiglet.figlet_format("Hos File Sorter")
@@ -20,13 +36,37 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 path_script = os.path.realpath(__file__)
 name_script = os.path.basename(__file__)
 
-#Just to make sure if you want to continue
+#Set percentages and making sure if you want to continue
 print("You are currently in {}".format(dir_path))
 
-print("\nIf you do not wish to continue now. Close this window, otherwise press the enter key to start.")
-keyboard.wait('enter')
+percentage = input("\nPlease enter the similarity percentage. (Default is 60%)")
+try:
+    percentage = int(percentage)
+except:
+        print("Input wrong value, defaulting to 60%")
+        percentage = 60
 
-#Start discoveirng files
+if (percentage < 0):
+    print("Percentage is lower than 0% OR is null, defaulting to 60%.")
+    percentage = 0.6
+else:
+    if percentage > 100:
+        print("Percentage is higher than 100%, defaulting to 60%.")
+        percentage = 0.6
+    else:
+        print("\nPercentage set as {} %.".format(percentage))
+        percentage = percentage / 100
+
+while True:
+    key = input("\nAre you sure you want to continue? Enter y to continue, n to quit.")
+    if key in ('y', 'n', 'Y', 'N'):
+        break
+        
+if key == "n":
+    exit()
+
+
+#Start discovering files
 print("\nDiscovering files in the directory...")
 
 discoveredResults = [name for name in os.listdir('.') if os.path.isfile(name)]
@@ -90,10 +130,10 @@ while (amountofResults >= 0):
         print("\n", ascii_banner_fail)
         print("Something went wrong with moving the files and creating folders.")
         print("Press the enter key to quit")
-        keyboard.wait('enter')
+        getch()
         exit()
 
 print("\n", ascii_banner_success)
 print("Finished with sorting. Scroll up for log.")
 print("Press the enter key to quit")
-keyboard.wait('enter')
+getch()
