@@ -3,7 +3,9 @@ Sort files in individual folders with multiple features for your comfort.
 
 ## Introduction
 This is my second Python program so this is just my testing grounds for Python and Github itself. But I am also using this script for my own sorting of files.\
-Open for contributions, as long as I can learn from them.
+Open for contributions, as long as I can learn from them.\
+\
+It is not perfect, a bit slow when you work with tons of files and folders. But it does the job for me.
 
 ## How does it work
 The script checks every file to see if a folder with a similiar enough name exists and then moves the file in there.\
