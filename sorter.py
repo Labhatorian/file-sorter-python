@@ -84,8 +84,9 @@ if key == "n":
 #f = open("moved.txt","w+")
 print("\nDiscovering files in the directory...")
 
-discoveredResults = [name for name in os.listdir('.') if os.path.isfile(name)]
-discoveredResults.remove(name_script)
+discoveredResults = [name for name in os.listdir('.') if os.path.isfile(name) and name != name_script]
+#discoveredResults.remove(name_script)
+
 if (IgnoredFileFound == 1):   
     discoveredResults.remove(name_ignored)
 amountofResults = len(discoveredResults) - 1
@@ -140,7 +141,6 @@ while (amountofResults >= 0):
                 break
             else:
                 folderListCount -= 1
-                print("Similarity: {}%".format(similarity))
                 continue
 
         if EmptyFile == 1:
