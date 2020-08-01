@@ -1,9 +1,10 @@
 ######Labhoratories######
-
-#Import libraries
+# !----- Libraries -----!
+#TODO: Bundle libraries with python.
 import os, os.path
 import shutil
 import pyfiglet
+import re
 from difflib import SequenceMatcher
 
 #For getch both Win32 and Unix.
@@ -21,9 +22,9 @@ except ImportError:
             return sys.stdin.read(1)
         finally:
             termios.tcsetattr(fd, termios.TCSADRAIN, old)
+            
 
-
-#Ascii banners for being cool
+# !----- Banners -----!
 ascii_banner = pyfiglet.figlet_format("Hos File Sorter")
 ascii_banner_fail = pyfiglet.figlet_format("Oh, c#ck!")
 ascii_banner_success = pyfiglet.figlet_format("Finished")
@@ -31,12 +32,25 @@ ascii_banner_success = pyfiglet.figlet_format("Finished")
 #Print banner
 print(ascii_banner)
 
-#Set some variables up
+# !----- Variable setup -----!
 dir_path = os.path.dirname(os.path.realpath(__file__))
 path_script = os.path.realpath(__file__)
 name_script = os.path.basename(__file__)
+name_ignored = "ignored.txt"
+IgnoredFileFound = 0
 
-#Set percentages and making sure if you want to continue
+log_name = "moved.txt"
+
+# !----- Ignored words -----!
+try:
+    with open(name_ignored,'r') as f:
+        ignored_list = [str(x) for x in f]
+    f.close
+    IgnoredFileFound = 1
+except FileNotFoundError:
+    print("Ignored words list not found.")
+
+# !----- Percentages -----!
 print("You are currently in {}".format(dir_path))
 
 percentageDec = input("\nPlease enter the similarity percentage. (Default is 60%)")
@@ -66,41 +80,56 @@ if key == "n":
     exit()
 
 
-#Start discovering files
+# !----- Discover files -----!
+#f = open("moved.txt","w+")
 print("\nDiscovering files in the directory...")
 
 discoveredResults = [name for name in os.listdir('.') if os.path.isfile(name)]
 discoveredResults.remove(name_script)
+if (IgnoredFileFound == 1):   
+    discoveredResults.remove(name_ignored)
 amountofResults = len(discoveredResults) - 1
 
-#List the files
+# !----- List files -----!
 print("There are {} files in the chosen directory:".format(len(discoveredResults)))
 for x in discoveredResults:
   print(x)
 
-#Check for similarity between 2 variables funciton
+# !----- Function for getting percentage of similarity in names -----!
 def similar(a, b):
+    for x in ignored_list:
+        x = x.rstrip('\n')
+       # b = b.str.replace(x, " ") # !---- IS A FILE
+        b = re.sub(r"\b{}\b".format(x), " ", b)
+
+    global EmptyFile
+    if b == " ":
+        EmptyFile = 1
+
     return SequenceMatcher(None, a, b).ratio()
 
-#Time for the main part of the script
+# !----- Get to work-----!
 print("\nMoving files and creating folders...")
 
 while (amountofResults >= 0):
     #Set up some variables for current file that's being worked on
     print("\nWorking with file {}...".format(discoveredResults[amountofResults]))
     filename, file_extension = os.path.splitext(discoveredResults[amountofResults])
+    filename = filename.lower()
+    EmptyFile = 0
 
     print("Discovering current folders.")
     folderList = [f.path for f in os.scandir(dir_path) if f.is_dir()]
+    folderList = [x.lower() for x in folderList]
     folderListCount = len(folderList) - 1
-    # for x in folderList:
-    #     print(x)
 
-    #The brains
+    #The main function of the program
     try:
         while folderListCount >= 0:
             folderpath, foldername = os.path.split(folderList[folderListCount])
+            foldername = foldername.lower()
             similarity = similar(foldername, filename)
+
             #Check for similarity in filename and foldername, put them together
             if (similarity >= percentage):
                 print("Similarity >= {}%, moving file {} to folder {}. ".format(percentageDec, filename, foldername))
@@ -111,7 +140,12 @@ while (amountofResults >= 0):
                 break
             else:
                 folderListCount -= 1
+                print("Similarity: {}%".format(similarity))
                 continue
+
+        if EmptyFile == 1:
+                break
+
          #If there is no folder do this
         if (folderListCount < 0):
             os.mkdir(filename)
@@ -125,13 +159,46 @@ while (amountofResults >= 0):
         print("Failed to move current file to folder.")
         print("File might already exist in folder, skipping...")
         amountofResults -= 1
-    except:
+
+
+
+# !----- WIP-----!
+  # except:
         #fail message feat. James May
-        print("\n", ascii_banner_fail)
-        print("Something went wrong with moving the files and creating folders.")
-        print("Press any key to quit")
-        getch()
-        exit()
+      #  print("\n", ascii_banner_fail)
+       # print("Something went wrong with moving the files and creating folders.")
+       # print("Press any key to quit")
+       # getch()
+       # exit()
+
+# f.close
+
+# if os.path.exists("movedlists"):
+#     try:
+#         folderLocation = "movedlists" + "/" + "moved.txt"
+#         shutil.move("moved.txt", "movedlists")
+#     except shutil.Error as e:
+#         try: 
+#             for i in log_name:
+#                 try:
+#                     os.rename(r"log_name",r'moved.txt%s.xml' % i)
+#                     shutil.move("moved.txt", "movedlists")
+# else:
+#     try:
+#         os.mkdir("movedlists")
+#         shutil.move("moved.txt", "movedlists")
+#     except shutil.Error as e:
+#         try: 
+#             os.rename(r'file path\OLD file name.file type',r'file path\NEW file name.file type')
+#             shutil.move("moved.txt", "movedlists")
+#         except shutil.Error as e:
+#         #fail message feat. James May
+#             print("\n", ascii_banner_fail)
+#             print("Something went wrong with moving the log.")
+#             print("Press any key to quit")
+#             getch()
+#             exit()
+    
 
 print("\n", ascii_banner_success)
 print("Finished with sorting. Scroll up for log.")
