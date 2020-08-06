@@ -15,9 +15,9 @@ There are features that can influence the program that you can read below:
 Just put it in the folder with all the files you want to get it sorted.
 
 ## Important
-This is in no way a perfect script. It makes mistakes for like 20% of the files, at least in my tests. You will probably need to still do some manual labour, but it will still be faster than doing every file invidually by hand.
+This is in no way a perfect script. It makes mistakes for like 20% of the files, at least in my tests. You will probably need to still do some manual labour, but it will still be faster than doing every file invidually by hand. I do recommend playing around with the percentages, sometimes going higher will yield better results.
 
-### Config
+## Config
 In the beginning of the script are a few variables you can change to your liking. However they don't do much. \
 *Maybe there will be a variable for the percentage instead of it asking for one every time.*
 
