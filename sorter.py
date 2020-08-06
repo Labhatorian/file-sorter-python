@@ -41,9 +41,11 @@ IgnoredFileFound = 0
 
 #You can change these, make sure you rename your ignored file too.
 debug = 0
+ask_log = 1
+ask_percentage = 0
+percentageConfig = 60
 name_ignored = "ignored.txt"
 log_name = "moved.txt"
-
 # !----- Ignored words -----!
 try:
     with open(name_ignored,'r') as f:
@@ -51,44 +53,64 @@ try:
     f.close
     IgnoredFileFound = 1
 except FileNotFoundError:
-    print("Ignored words list not found.")
+    print("Ignored list not found.")
 
+# !----- Log -----!
+try:
+    log = open("log.txt", "r")
+    if ask_log == 1:
+        print("There is already a log file in the files.")
+        while True:
+            key = input("\nAre you sure you want to continue? The log file will then get overwritten. Enter y to continue, n to quit.")
+            if key in ('y', 'n', 'Y', 'N'):
+                break
+        
+        if key == "n":
+            exit()
+    log.close
+    log = open("log.txt", "w")
+except FileNotFoundError:
+    print("Log File not found.")
+    log = open("log.txt", "w")
 # !----- Percentages -----!
 # Set percentage to check for
 print("You are currently in {}".format(dir_path))
 
-percentageDec = input("\nPlease enter the similarity percentage. (Default is 60%)")
-try:
-    percentageDec = int(percentageDec)
-except:
+if ask_percentage == 1:
+    percentageDec = input("\nPlease enter the similarity percentage. (Default is 60%)")
+    try:
+        percentageDec = int(percentageDec)
+    except:
         print("Input invalid value, defaulting to 60%")
         percentageDec = 60
 
-if (percentageDec < 0):
-    print("Percentage is lower than 0%, defaulting to 60%.")
-    percentage = 0.6
-else:
-    if percentageDec > 100:
-        print("Percentage is higher than 100%, defaulting to 60%.")
+    if (percentageDec < 0):
+        print("Percentage is lower than 0%, defaulting to 60%.")
         percentage = 0.6
     else:
-        print("\nPercentage set as {} %.".format(percentageDec))
-        percentage = percentageDec / 100
+        if percentageDec > 100:
+            print("Percentage is higher than 100%, defaulting to 60%.")
+            percentage = 0.6
+        else:
+            print("\nPercentage set as {} %.".format(percentageDec))
+            percentage = percentageDec / 100
 
-while True:
-    key = input("\nAre you sure you want to continue? Enter y to continue, n to quit.")
-    if key in ('y', 'n', 'Y', 'N'):
-        break
+    while True:
+        key = input("\nAre you sure you want to continue? Enter y to continue, n to quit.")
+        if key in ('y', 'n', 'Y', 'N'):
+            break
         
-if key == "n":
-    exit()
-
+    if key == "n":
+        exit()
+else:
+    percentageDec = percentageConfig
+    percentage = percentageDec / 100
+    print("Config ask_percentage set to 0 => Percentage set as {}%".format(percentageConfig))
 
 # !----- Discover files -----!
-#f = open("moved.txt","w+")
 print("\nDiscovering files in the directory...")
 
-discoveredResults = [name for name in os.listdir('.') if os.path.isfile(name) and name != name_script]
+discoveredResults = [name for name in os.listdir('.') if os.path.isfile(name) and name != name_script and name != log_name]
 
 if (IgnoredFileFound == 1):   
     discoveredResults.remove(name_ignored)
@@ -105,7 +127,7 @@ def similar(a, b):
         for x in ignored_list:
             x = x.rstrip('\n')
             b = re.sub(r"\b{}\b".format(x), " ", b)
-
+            a = re.sub(r"\b{}\b".format(x), " ", a)
     global EmptyFile
     if b == " ":
         EmptyFile = 1
@@ -139,8 +161,12 @@ while (amountofResults >= 0):
             #Check for similarity in filename and foldername, put them together if okay
             if (similarity >= percentage):
                 print("Similarity >= {}%, moving file {} to folder {}. ".format(percentageDec, filename, foldername))
-                folderLocationExisting = dir_path + "/" + foldername
+                folderLocationExisting = dir_path + "\\" + foldername
                 shutil.move(discoveredResults[amountofResults], folderLocationExisting)
+
+                newFileLocation = folderLocationExisting + "\\" + filename + file_extension
+                log.write("{}\n".format(newFileLocation))
+
                 amountofResults -= 1
                 FolderListCount = -1
                 break
@@ -155,9 +181,12 @@ while (amountofResults >= 0):
         if (folderListCount < 0):
             os.mkdir(filename)
             print("Folder created and now moving {}. ".format(filename))
-            folderLocation = dir_path + "/" + filename
+            folderLocation = dir_path + "\\" + filename
             shutil.move(discoveredResults[amountofResults], folderLocation)
             
+            newFileLocation = folderLocationExisting + "\\" + filename + file_extension
+            log.write("{}\n".format(newFileLocation))
+
             #Add the new folder to the current pool of folders
             folderList.append(folderLocation)
             amountofResults -= 1
@@ -168,47 +197,8 @@ while (amountofResults >= 0):
         print("File might already exist in folder, skipping...")
         amountofResults -= 1
 
-
-
-# !----- WIP-----!
-  # except:
-        #fail message feat. James May
-      #  print("\n", ascii_banner_fail)
-       # print("Something went wrong with moving the files and creating folders.")
-       # print("Press any key to quit")
-       # getch()
-       # exit()
-
-# f.close
-
-# if os.path.exists("movedlists"):
-#     try:
-#         folderLocation = "movedlists" + "/" + "moved.txt"
-#         shutil.move("moved.txt", "movedlists")
-#     except shutil.Error as e:
-#         try: 
-#             for i in log_name:
-#                 try:
-#                     os.rename(r"log_name",r'moved.txt%s.xml' % i)
-#                     shutil.move("moved.txt", "movedlists")
-# else:
-#     try:
-#         os.mkdir("movedlists")
-#         shutil.move("moved.txt", "movedlists")
-#     except shutil.Error as e:
-#         try: 
-#             os.rename(r'file path\OLD file name.file type',r'file path\NEW file name.file type')
-#             shutil.move("moved.txt", "movedlists")
-#         except shutil.Error as e:
-#         #fail message feat. James May
-#             print("\n", ascii_banner_fail)
-#             print("Something went wrong with moving the log.")
-#             print("Press any key to quit")
-#             getch()
-#             exit()
-    
-
+log.close
 print("\n", ascii_banner_success)
-print("Finished with sorting. Scroll up for log.")
+print("Finished with sorting. Scroll up for detailed log.")
 print("Press any key to quit")
 getch()
