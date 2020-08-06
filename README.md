@@ -31,7 +31,9 @@ It will remove the word from the filename before getting the similarity percenta
 This does not remove parts of words in a file name i.e. ignored word is potato and the filename is potatocrop, potatocrop will not be changed.
 
 ### Logging
-Disabled. Work in progress.
+The script logs the path of every moved file and saves it to a txt.\
+Not implemented: Use the reserver script to get all the files back to the main folder or a new folder.\
+Not implemented: Change `log_output` in the config to 1 in order to save the terminal output to a file too.
 
 ## Planned things
 Logging and a reverse script. Be able to use them together
